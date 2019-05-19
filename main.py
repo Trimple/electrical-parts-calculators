@@ -10,7 +10,22 @@ resistance2 = None
 resistanceFactor = None
 accuracyR1 = 0.01
 accuracyR2 = 0.01
-outputError = None
+
+
+def calculateDeviderParams(inVoltage, res1, res2, acc1, acc2):
+    outVoltage = inVoltage*res2/(res1 + res2)
+    floatingCurrent = inVoltage/(res1 + res2)*1000
+    powerDissipation = floatingCurrent*inVoltage
+    outputError = (inputVoltage/outVoltage*(res2*(1 + acc2))/(res1*(1 - acc1) + res2*(1 + acc2)) - 1)*100
+    print("\nInput voltage: %.2f V" % (inVoltage))
+    print("Resistance of R1: " + str(res1) + " Ohm")
+    print("Resistance of R2: " + str(res2) + " Ohm")
+    print("Accuracy: R1 - " + str(acc1) + ", R2 - " + str(acc2))
+    print("=====================================")
+    print("Output voltage: %.2f V" % (outVoltage))
+    print("Floating current: %.2f mA" % (floatingCurrent))
+    print("Power dissipation: %.2f mW" % (powerDissipation))
+    print("Max output error: %.2f" % (outputError) + " %\n")
 
 
 if __name__ == '__main__':
@@ -92,7 +107,8 @@ if __name__ == '__main__':
             print("input voltage can't be bigger then output one!")
             sys.exit(40)
         if(resistance1 != None and resistance2 != None):
-            print("Calculating parameters")
+            print("Wrong set of parameters!")
+            sys.exit(41)
 
         elif(resistance1 == None and resistance2 == None):
             print("Calculating resistors values")
@@ -104,9 +120,11 @@ if __name__ == '__main__':
             print("Calculating resistor 2 value")
 
     elif(inputVoltage != None and outputVoltage == None and resistance1 != None and resistance2 != None):
-        print("Calculating output voltage")
+        calculateDeviderParams(inputVoltage, resistance1, resistance2, accuracyR1, accuracyR2)
+
     elif(inputVoltage == None and outputVoltage != None and resistance1 != None and resistance2 != None):
         print("Calculating input voltage")
+
     else:
         print("Wrong set of parameters!")
         sys.exit(41)
