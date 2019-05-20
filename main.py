@@ -1,22 +1,72 @@
-# resistor deviders calculator
+# resistor dividers calculator
 
 import sys
+import os
 import getopt
+
+typicalValues = [1, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2, 2.2, 2.4, 2.7, 3, 3.3, 3.6, 3.9, 4.3, 4.7,
+            5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1, 10]
 
 inputVoltage = None
 outputVoltage = None
 resistance1 = None
 resistance2 = None
-resistanceFactor = None
 accuracyR1 = 0.01
 accuracyR2 = 0.01
 
+def calculateR1(inVoltage, outVoltage, res2, acc1, acc2):
+    LowerResistance = 0
+    exactValue = res2*(inVoltage - outVoltage)/outVoltage
+    resistanceFactor = 0
+    while(exactValue / 10 > 1):
+        resistanceFactor = resistanceFactor + 1
+        exactValue = exactValue / 10
+    for value in typicalValues:
+        if (abs(value - exactValue) < 0.001):       #Way to compare float numbers
+            print("\nResistor R1 value is\033[92m %.1f Ohm \033[0m" % (exactValue*pow(10, resistanceFactor)))
+            print("divider parameters:")
+            calculatedividerParams(inVoltage, value*pow(10, resistanceFactor), res2, acc1, acc2)
+            break
 
-def calculateDeviderParams(inVoltage, res1, res2, acc1, acc2):
+        elif (value > exactValue):
+            print("\nResistor exact value is\033[91m %.1f Ohm\033[0m, but it is not standart. \nClosest standart value lower than exact one is %.1f Ohm. Parameters of divider:" % (exactValue*pow(10, resistanceFactor), LowerResistance*pow(10, resistanceFactor)))
+            calculatedividerParams(inVoltage, LowerResistance*pow(10, resistanceFactor), res2, acc1, acc2)
+            print("Closest standart value higher than exact one is %.1f Ohm. Parameters of divider:" % (value*pow(10, resistanceFactor)))
+            calculatedividerParams(inVoltage, value*pow(10, resistanceFactor), res2, acc1, acc2)
+            break
+
+        else:
+            LowerResistance = value
+
+def calculateR2(inVoltage, outVoltage, res1, acc1, acc2):
+        LowerResistance = 0
+        exactValue = res1*outVoltage/(inVoltage - outVoltage)
+        resistanceFactor = 0
+        while(exactValue / 10 > 1):
+            resistanceFactor = resistanceFactor + 1
+            exactValue = exactValue / 10
+        for value in typicalValues:
+            if (abs(value - exactValue) < 0.001):       #Way to compare float numbers
+                print("\nResistor R1 value is\033[92m %.1f Ohm \033[0m" % (exactValue*pow(10, resistanceFactor)))
+                print("divider parameters:")
+                calculatedividerParams(inVoltage, res1, value*pow(10, resistanceFactor), acc1, acc2)
+                break
+
+            elif (value > exactValue):
+                print("\nResistor exact value is\033[91m %.1f Ohm\033[0m, but it is not standart. \nClosest standart value lower than exact one is %.1f Ohm. Parameters of divider:" % (exactValue*pow(10, resistanceFactor), LowerResistance*pow(10, resistanceFactor)))
+                calculatedividerParams(inVoltage, res1, LowerResistance*pow(10, resistanceFactor), acc1, acc2)
+                print("Closest standart value higher than exact one is %.1f Ohm. Parameters of divider:" % (value*pow(10, resistanceFactor)))
+                calculatedividerParams(inVoltage, res1, value*pow(10, resistanceFactor), acc1, acc2)
+                break
+
+            else:
+                LowerResistance = value
+
+def calculatedividerParams(inVoltage, res1, res2, acc1, acc2):
     outVoltage = inVoltage*res2/(res1 + res2)
     floatingCurrent = inVoltage/(res1 + res2)*1000
     powerDissipation = floatingCurrent*inVoltage
-    outputError = (inputVoltage/outVoltage*(res2*(1 + acc2))/(res1*(1 - acc1) + res2*(1 + acc2)) - 1)*100
+    outputError = (inVoltage/outVoltage*(res2*(1 + acc2))/(res1*(1 - acc1) + res2*(1 + acc2)) - 1)*100
     print("\nInput voltage: %.2f V" % (inVoltage))
     print("Resistance of R1: " + str(res1) + " Ohm")
     print("Resistance of R2: " + str(res2) + " Ohm")
@@ -29,9 +79,9 @@ def calculateDeviderParams(inVoltage, res1, res2, acc1, acc2):
 
 
 if __name__ == '__main__':
+    os.system("cls")
     try:
         opts, args = getopt.getopt(sys.argv[1:],"",["ov=", "iv=", "r1=", "r2=", "a1=", "a2="])
-        print(opts)
     except getopt.GetoptError as err:
         print(str(err))
         sys.exit(2)
@@ -104,7 +154,7 @@ if __name__ == '__main__':
 
     if(inputVoltage != None and outputVoltage != None):
         if(outputVoltage >= inputVoltage):
-            print("input voltage can't be bigger then output one!")
+            print("input voltage can't be bigger than output one!")
             sys.exit(40)
         if(resistance1 != None and resistance2 != None):
             print("Wrong set of parameters!")
@@ -114,16 +164,16 @@ if __name__ == '__main__':
             print("Calculating resistors values")
 
         elif(resistance1 == None and resistance2 != None):
-            print("Calculating resistor 1 value")
+            calculateR1(inputVoltage, outputVoltage, resistance2, accuracyR1, accuracyR2)
 
         elif(resistance1 != None and resistance2 == None):
-            print("Calculating resistor 2 value")
+            calculateR2(inputVoltage, outputVoltage, resistance1, accuracyR1, accuracyR2)
 
     elif(inputVoltage != None and outputVoltage == None and resistance1 != None and resistance2 != None):
-        calculateDeviderParams(inputVoltage, resistance1, resistance2, accuracyR1, accuracyR2)
+        calculatedividerParams(inputVoltage, resistance1, resistance2, accuracyR1, accuracyR2)
 
     elif(inputVoltage == None and outputVoltage != None and resistance1 != None and resistance2 != None):
-        print("Calculating input voltage")
+        calculatedividerParams(outputVoltage*(resistance1 + resistance2)/resistance2, resistance1, resistance2, accuracyR1, accuracyR2)
 
     else:
         print("Wrong set of parameters!")
