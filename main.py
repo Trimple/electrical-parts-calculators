@@ -3,6 +3,7 @@
 import sys
 import os
 import getopt
+import messages
 
 typicalValues = [1, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2, 2.2, 2.4, 2.7, 3, 3.3, 3.6, 3.9, 4.3, 4.7,
             5.1, 5.6, 6.2, 6.8, 7.5, 8.2, 9.1, 10]
@@ -188,7 +189,7 @@ if __name__ == '__main__':
             print("input voltage can't be bigger than output one!")
             sys.exit(40)
         if(resistance1 != None and resistance2 != None):
-            print("Wrong set of parameters!")
+            print(messages.wrongParametersInputMessage)
             sys.exit(41)
 
         elif(resistance1 == None and resistance2 == None):
@@ -207,5 +208,5 @@ if __name__ == '__main__':
         calculateDividerParams(outputVoltage*(resistance1 + resistance2)/resistance2, resistance1, resistance2, accuracyR1, accuracyR2)
 
     else:
-        print("Wrong set of parameters!")
+        print(messages.wrongParametersInputMessage)
         sys.exit(41)
